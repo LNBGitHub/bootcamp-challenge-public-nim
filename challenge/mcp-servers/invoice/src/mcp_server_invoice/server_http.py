@@ -211,7 +211,22 @@ class ExternalAgents:
     async def _media_lookup(self,query) -> List[types.TextContent]:
         ## TODO
         ## invoke qna agent and return output
-        pass
+        response = await self.qna_agent.run(query)
+        if response is None:    
+            raise ValueError("No response from agent")
+        if not isinstance(response, str):
+            raise ValueError("Response is not a string")
+        if response.strip() == "":
+            raise ValueError("Response is empty")
+        if not response.endswith("."):
+            response += "."
+        if not response[0].isupper():
+            response = response[0].upper() + response[1:]
+        return [types.TextContent(
+            type="text",    
+            text=response
+        )]
+    pass
 
 def main(db_path:str,nvidia_api_key:str,mcp_server_qna_path:str,inf_url:str):
     invoice = Invoice(db_path)
@@ -221,13 +236,73 @@ def main(db_path:str,nvidia_api_key:str,mcp_server_qna_path:str,inf_url:str):
     async def handle_list_tools() -> list[types.Tool]:
         ## TODO
         ## return schema for tools
-        pass
+        return [
+            types.Tool(
+                name="invoice_refund",
+                description="Refund an invoice or invoice lines in the Chinook DB.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "invoice_id": {"type": "integer", "description": "ID of the invoice to refund"},
+                        "invoice_line_ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "List of invoice line IDs to refund"
+                        },
+                        "mock": {"type": "boolean", "default": True, "description": "If true, do not actually refund"}
+                    },
+                    "required": [],
+                },
+            ),
+            types.Tool(
+                name="invoice_lookup",
+                description="Lookup invoices in the Chinook DB based on customer and track information.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "customer_first_name": {"type": "string", "description": "First name of the customer"},
+                        "customer_last_name": {"type": "string", "description": "Last name of the customer"},
+                        "customer_phone": {"type": "string", "description": "Phone number of the customer"},
+                        "track_name": {"type": ["string", "null"], "description": "Name of the track"},
+                        "album_title": {"type": ["string", "null"], "description": "Title of the album"},
+                        "artist_name": {"type": ["string", "null"], "description": "Name of the artist"},
+                        "purchase_date_iso_8601": {
+                            "type": ["string", "null"],
+                            "format":"date-time",
+                            "description":"Purchase date in ISO 8601 format"
+                        }
+                    },
+                    # No required fields
+                    # 'required': ['customer_first_name', 'customer_last_name', 'customer_phone']
+                },
+            ),
+            types.Tool(
+                name="media_lookup",
+                description="Lookup media information using an external agent.",
+                inputSchema={
+                    'type': 'object',
+                    'properties': {
+                        'query': {'type': 'string', 'description': 'Query for media lookup'}
+                    },
+                    'required': ['query']
+                }
+            )
+        ]
+    pass
 
     @mcp.call_tool()
     async def handle_call_tool(name: str, args: dict[str, Any] | None):
         ## TODO
         ## implement tool calling logic
-        pass
+        if name == "invoice_refund":
+            return invoice._invoice_refund(**args)
+        elif name == "invoice_lookup":
+            return invoice._invoice_lookup(**args)
+        elif name == "media_lookup":
+            return await external_agent._media_lookup(args['query'])
+        else:
+            raise ValueError(f"Unknown tool name: {name}")
+    pass
     
     # Create the session manager with true stateless mode
     session_manager = StreamableHTTPSessionManager(

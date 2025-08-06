@@ -156,13 +156,63 @@ async def main(db_path:str):
     @mcp.list_tools()
     async def handle_list_tools() -> list[types.Tool]:
         ## TODO
-       ## Return tool schema
-       pass
+        ## implement tool listing logic
+        return [
+            types.Tool(
+                name="lookup_track",
+                description="Lookup a track in Chinook DB based on identifying information about.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_name": {"type": "string", "description": "Name of the track"},
+                        "album_title": {"type": "string", "description": "Title of the album"},
+                        "artist_name": {"type": "string", "description": "Name of the artist"},
+                    },
+                    "required": [],
+                },
+            ),
+            types.Tool(
+                name="lookup_album",
+                description="Lookup an album in Chinook DB based on identifying information about.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_name": {"type": "string", "description": "Name of the track"},
+                        "album_title": {"type": "string", "description": "Title of the album"},
+                        "artist_name": {"type": "string", "description": "Name of the artist"},
+                    },
+                    "required": [],
+                },
+            ),
+            types.Tool(
+                name="lookup_artist",
+                description="Lookup an artist in Chinook DB based on identifying information about.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_name": {"type": "string", "description": "Name of the track"},
+                        "album_title": {"type": "string", "description": "Title of the album"},
+                        "artist_name": {"type": "string", "description": "Name of the artist"},
+                    },
+                    "required": [],
+                },
+            ),
+        ]
+        ## Return tool schema
+        pass
 
     @mcp.call_tool()
     async def handle_call_tool(name: str, args: dict[str, Any] | None):
         ## TODO
         ## implement tool calling logic
+        if name == "lookup_track":
+            return qna._lookup_track(**args)
+        elif name == "lookup_album":
+            return qna._lookup_album(**args)
+        elif name == "lookup_artist":
+            return qna._lookup_artist(**args)
+        else:
+            raise ValueError(f"Unknown tool name: {name}")
         pass
     
     async with stdio_server() as (read_stream,write_stream):
