@@ -9,7 +9,7 @@ async def main(path_to_server_file):
     # Initialise openai client to invoke NVIDIA NIMs (LLM)
     openai_client = AsyncOpenAI(
         base_url = "https://integrate.api.nvidia.com/v1",
-        api_key = os.environ["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"]
+        api_key = "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"
     )
 
     # Initialise MCP Client
@@ -85,6 +85,6 @@ async def main(path_to_server_file):
 
     await mcp_client.cleanup()
 
-asyncio.run(main('./tutorial/mcp-server-demo/server_low_level.py'))
+asyncio.run(main('C:\\Users\\lnbco\\OneDrive\\Documents\\GitHub\\bootcamp-challenge-public-nim\\tutorial\\mcp-server-demo\\server_low_level.py'))
 
     
