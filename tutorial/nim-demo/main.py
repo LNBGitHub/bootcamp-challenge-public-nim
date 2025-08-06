@@ -9,7 +9,7 @@ async def main(path_to_server_file):
     # Initialise openai client to invoke NVIDIA NIMs (LLM)
     openai_client = AsyncOpenAI(
         base_url = "https://integrate.api.nvidia.com/v1",
-        api_key = os.environ["NVIDIA_API_KEY"]
+        api_key = os.environ["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"]
     )
 
     # Initialise MCP Client
